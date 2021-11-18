@@ -74,3 +74,8 @@ typings/
 
 # FuseBox cache
 .fusebox/
+
+dist
+testing
+build
+tsconfig.testing.json
