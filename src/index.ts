@@ -5,7 +5,7 @@ async function GetTestMatrix(width: number, height: number, stepWidth: number, s
     for (let i = 0; i < width; i++) {
         const row: TestResults[] = [];
         for (let j = 0; j < height; j++) {
-            row[j] = await Benchmark.benchmark((i+1)*stepWidth, (j+1)*stepHeight, rounds, true);
+            row[j] = await Benchmark.benchmark((i+1)*stepWidth, (j+1)*stepHeight, 10, rounds, true);
             console.info(`Progress: (${(i*height)+j}/${width*height})`);
         }
         matrix[i] = row;
@@ -14,5 +14,5 @@ async function GetTestMatrix(width: number, height: number, stepWidth: number, s
 }
 
 (async () => {
-    await GetTestMatrix(10, 10, 10, 10, 5);
+    await GetTestMatrix(20, 10, 10, 10, 5);
 })();

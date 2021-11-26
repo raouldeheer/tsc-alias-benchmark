@@ -11,7 +11,7 @@ export interface TestResults {
 
 export class Benchmark {
 
-    constructor(readonly maxFiles: number, readonly maxPaths: number, readonly rounds: number, readonly silent = false) { }
+    constructor(readonly maxFiles: number, readonly maxPaths: number, readonly maxImports: number, readonly rounds: number, readonly silent = false) { }
 
     private async setup() {
         mylas.dir.mkS("./testing");
@@ -40,22 +40,29 @@ export class Benchmark {
         const promises = [];
         for (let i = 0; i < this.maxFiles; i++) {
             const j = i % this.maxPaths;
-            promises.push(mylas.save(`./testing/index${i}.js`, `
-"use strict";
+            const imports = 
+`const ball_1 = __importDefault(require("#${j}/ball"));
+const cube_1 = __importDefault(require("#${j}/cube"));
+const line_1 = __importDefault(require("#${j}/line"));
+`;
+            let allImports = "";
+            for (let i = 0; i < this.maxImports; i++) {
+                allImports += imports;
+            }
+            const data = 
+`"use strict";
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const ball_1 = __importDefault(require("#${j}/ball"));
-const cube_1 = __importDefault(require("#${j}/cube"));
-const line_1 = __importDefault(require("#${j}/line"));
-const ball = new ball_1.default({ x: 0, y: 0, z: 0 }, 5);
+`+allImports+`const ball = new ball_1.default({ x: 0, y: 0, z: 0 }, 5);
 const cube = new cube_1.default({ x: 0, y: 0, z: 0 }, 5, 5, 5);
 const line = new line_1.default({ x: 0, y: 0, z: 0 }, { x: 5, y: 5, z: 5 }, 20);
 console.log(ball.toString());
 console.log(cube.toString());
 console.log(line.toString());
-`));
+`;
+            promises.push(mylas.save(`./testing/index${i}.js`, data));
         }
         await Promise.all(promises);
     }
@@ -107,7 +114,7 @@ console.log(line.toString());
         };
     }
 
-    static benchmark(maxFiles: number, maxPaths: number, rounds: number, silent?: boolean) {
-        return (new this(maxFiles, maxPaths, rounds, silent)).runTest();
+    static benchmark(maxFiles: number, maxPaths: number, maxImports: number, rounds: number, silent?: boolean) {
+        return (new this(maxFiles, maxPaths, maxImports, rounds, silent)).runTest();
     }
 }
